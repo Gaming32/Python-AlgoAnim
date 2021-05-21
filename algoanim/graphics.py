@@ -20,7 +20,7 @@ class GraphicsThread(Thread):
         super().__init__(name='Graphics', daemon=True)
         self.array = array
 
-    def render(self, array):
+    def render(self, array: Array):
         winw, winh = self.window.get_size()
         scalex, scaley = winw / len(array), winh / len(array)
         j = 0
@@ -29,8 +29,16 @@ class GraphicsThread(Thread):
             if width == 0:
                 continue
             val = list.__getitem__(array, i) # Doing this to avoid highlighting indices while rendering
-            y = int((winh) - (val + 1) * scaley)
+            y = int(winh - (val + 1) * scaley)
             self.window.fill((255, 255, 255), Rect(j, y, width, int((val + 1) * scaley)))
+            j += width
+        j = 0
+        for i in range(len(array)):
+            width = int(scalex * i) - j
+            if i in array.marks:
+                val = list.__getitem__(array, i) # Doing this to avoid highlighting indices while rendering
+                y = int(winh - (val + 1) * scaley)
+                self.window.fill((255, 0, 0), Rect(j, y, max(width, 2), int((val + 1) * scaley)))
             j += width
 
     def run(self) -> None:
