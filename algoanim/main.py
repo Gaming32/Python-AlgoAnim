@@ -21,8 +21,8 @@ class MainWindow:
     def __init__(self) -> None:
         self.load_sorts()
         self.create_widgets()
-        self.graphics = GraphicsThread()
-        self.array = Array(128)
+        self.array = Array(2048)
+        self.graphics = GraphicsThread(self.array)
         self.sort_thread = None
 
     def load_sorts(self) -> None:

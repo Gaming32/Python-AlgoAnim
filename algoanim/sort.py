@@ -3,6 +3,7 @@ from algoanim.array import Array
 import os
 import importlib.machinery
 import types
+import random
 from typing import Optional
 
 
@@ -30,6 +31,7 @@ class SortThread(Thread):
 
     def run(self) -> None:
         self.wind.sort_thread = self
+        random.shuffle(self.wind.array)
         sort = self.klass()
         sort.run(self.wind.array)
         self.wind.sort_thread = None
