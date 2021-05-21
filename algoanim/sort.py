@@ -34,6 +34,7 @@ class SortThread(Thread):
         random.shuffle(self.wind.array)
         sort = self.klass()
         sort.run(self.wind.array)
+        self.wind.array.marks.clear()
         self.wind.sort_thread = None
 
 
