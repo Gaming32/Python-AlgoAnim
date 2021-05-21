@@ -22,15 +22,15 @@ class GraphicsThread(Thread):
 
     def render(self, array):
         winw, winh = self.window.get_size()
-        scalex, scaley = (winw - 40) / len(array), winh / len(array)
+        scalex, scaley = winw / len(array), winh / len(array)
         j = 0
         for i in range(len(array)):
-            width = int(scalex * (i + 10)) - j
+            width = int(scalex * i) - j
             if width == 0:
                 continue
             val = list.__getitem__(array, i) # Doing this to avoid highlighting indices while rendering
-            y = int((winh - 20) - (val + 1) * scaley)
-            self.window.fill((255, 255, 255), Rect(j + 20, y, width, int((val + 1) * scaley)))
+            y = int((winh) - (val + 1) * scaley)
+            self.window.fill((255, 255, 255), Rect(j, y, width, int((val + 1) * scaley)))
             j += width
 
     def run(self) -> None:
