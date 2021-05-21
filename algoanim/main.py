@@ -1,11 +1,13 @@
 from typing import Optional
 from algoanim.array import Array
 import os
-from algoanim.utils import SORTS_DIR
+from algoanim.utils import SORTS_DIR, TITLE
 from algoanim.sort import Sort, SortThread, load_sort_file
 from threading import Thread
 import tkinter as tk
-import tkinter.ttk as ttk
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
 
 from algoanim.graphics import GraphicsThread
 
@@ -13,10 +15,12 @@ from algoanim.graphics import GraphicsThread
 class MainWindow:
     root: tk.Tk
     choose_sort: ttk.Combobox
+    import_sort: ttk.Button
     graphics: GraphicsThread
     sorts: dict[str, Sort]
     array: Array
     sort_thread: Optional[SortThread]
+    file_dialog: filedialog.Open
 
     def __init__(self) -> None:
         self.load_sorts()
@@ -37,11 +41,16 @@ class MainWindow:
 
     def create_widgets(self) -> None:
         self.root = tk.Tk()
+        self.root.title(TITLE)
+        self.file_dialog = filedialog.Open(self.root, initialdir=os.getcwd())
         # Make the choose sort selection
         tk.Label(self.root, text='Choose Sort:').pack()
         self.choose_sort = ttk.Combobox(self.root, text='Choose Sort', values=list(self.sorts), state='readonly')
         self.choose_sort.bind('<<ComboboxSelected>>', self.choose_sort_click)
         self.choose_sort.pack()
+        # Import sort button
+        self.import_sort = ttk.Button(text='Import Sort', command=self.import_sort_click)
+        self.import_sort.pack()
 
     def choose_sort_click(self, event: tk.Event) -> None:
         if self.sort_thread is not None:
@@ -51,6 +60,18 @@ class MainWindow:
         print('Sort selected:', klass)
         thread = SortThread(self, klass)
         thread.start()
+
+    def import_sort_click(self) -> None:
+        path = self.file_dialog.show(title=f'{TITLE} - Import Sort')
+        if not path:
+            return
+        klass = load_sort_file(path, 'algoanim.sorts')
+        if klass is not None:
+            self.sorts[klass.name] = klass
+            self.choose_sort.config(values=list(self.sorts))
+            messagebox.showinfo(TITLE, f'Successfully loaded sort "{klass.name}"!')
+        else:
+            messagebox.showerror(TITLE, f'"{os.path.basename(path)}" is not a sort file!')
 
     def check_closed(self) -> None:
         if hasattr(self.graphics, 'running') and not self.graphics.running:
