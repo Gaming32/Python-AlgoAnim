@@ -1,5 +1,9 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from threading import Thread
 from algoanim.array import Array
+if TYPE_CHECKING:
+    from algoanim.main import MainWindow
 import os
 import importlib.machinery
 import types
@@ -23,8 +27,9 @@ class Sort(metaclass=SortMeta):
 
 class SortThread(Thread):
     klass = type[Sort]
+    wind: MainWindow
 
-    def __init__(self, wind, klass: type[Sort]):
+    def __init__(self, wind: MainWindow, klass: type[Sort]):
         super().__init__(name='Sorting', daemon=True)
         self.klass = klass
         self.wind = wind
@@ -36,6 +41,7 @@ class SortThread(Thread):
         sort = self.klass()
         sort.run(self.wind.array)
         self.wind.array.reset(len(self.wind.array))
+        self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
         self.wind.length_scale.config(state='normal')
         self.wind.sort_thread = None
 

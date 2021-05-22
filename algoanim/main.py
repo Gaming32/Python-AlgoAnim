@@ -18,15 +18,17 @@ class MainWindow:
     choose_sort: ttk.Combobox
     import_sort: ttk.Button
     cancel_delay: ttk.Button
-    scales: tk.Frame
     length_scale: ttk.Scale
-    speed_scale: ttk.Scale
 
     graphics: GraphicsThread
     sorts: dict[str, Sort]
     array: Array
     sort_thread: Optional[SortThread]
     file_dialog: filedialog.Open
+
+    is_scale_changing: bool
+    lock_to_pow2: bool
+    delay_multiplier: float
 
     def __init__(self) -> None:
         self.load_sorts()
@@ -60,15 +62,14 @@ class MainWindow:
         # Cancel delay button
         self.cancel_delay = ttk.Button(self.root, text='Cancel delay', command=self.cancel_delay_click)
         self.cancel_delay.pack()
-        ## Scales
-        self.scales = tk.Frame()
+        self.delay_multiplier = 1
         # Length scale
-        self.length_scale = ttk.Scale(self.scales, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7)
-        self.length_scale.pack(side=tk.LEFT)
-        # Speed scale
-        self.speed_scale = ttk.Scale(self.scales, command=self.speed_scale_change, orient='vertical', to=1, from_=20, value=9)
-        self.speed_scale.pack(side=tk.LEFT)
-        self.scales.pack()
+        self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7, length=250)
+        self.length_scale.bind('<Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', False)))
+        self.length_scale.bind('<Shift-Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', True)))
+        self.length_scale.pack()
+        self.is_scale_changing = False
+        self.lock_to_pow2 = False
 
     def choose_sort_click(self, event: tk.Event) -> None:
         if self.sort_thread is not None:
@@ -92,14 +93,19 @@ class MainWindow:
             messagebox.showerror(TITLE, f'"{os.path.basename(path)}" is not a sort file!')
 
     def cancel_delay_click(self) -> None:
-        self.array.delay = 0
+        self.array.set_delay_multiplier(0)
 
     def length_scale_change(self, pow) -> None:
+        if self.is_scale_changing:
+            return
+        self.is_scale_changing = True
         if self.sort_thread is None:
-            self.array.reset(int(2 ** float(pow)))
-
-    def speed_scale_change(self, pow) -> None:
-        self.array.set_delay_multiplier(int(2 ** float(pow)))
+            pow = float(pow)
+            if self.lock_to_pow2:
+                pow = int(pow)
+                self.length_scale.set(int(pow))
+            self.array.reset(int(2 ** pow))
+        self.is_scale_changing = False
 
     def check_closed(self) -> None:
         if hasattr(self.graphics, 'running') and not self.graphics.running:
