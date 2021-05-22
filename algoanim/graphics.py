@@ -48,7 +48,7 @@ class GraphicsThread(Thread):
                 self.window.fill((255, 0, 0), Rect(j, y, max(width, 2), int((val + 1) * scaley)))
             j += width
 
-    def show_stats(self):
+    def show_stats(self, tick_ms: int):
         delay = self.array.single_delay * self.array.delay
         stats = self.array.stats
         text = self.label
@@ -56,6 +56,7 @@ class GraphicsThread(Thread):
         text += f'   {delay:5}ms delay'
         text += f'   {stats.writes:4} writes'
         text += f'   {stats.accesses:4} accesses'
+        text += f'   {1000 / tick_ms:10.0f} fps'
         render = self.stats_font.render(text, True, (255, 255, 255))
         rect = render.get_rect()
         self.window.blit(render.convert_alpha(), (10, 10, rect.w, rect.h))
@@ -68,6 +69,7 @@ class GraphicsThread(Thread):
         self.stats_font = pygame.font.SysFont('lucida console', 16)
         self.clock = pygame.time.Clock()
         self.running = True
+        lastms = 1000 // 60
         while self.running:
             ms = self.clock.tick(60)
             for event in pygame.event.get():
@@ -77,5 +79,5 @@ class GraphicsThread(Thread):
             with self.array.length_lock:
                 self.render(self.array)
             if self.should_show_stats:
-                self.show_stats()
+                self.show_stats((ms + lastms) // 2)
             pygame.display.update()
