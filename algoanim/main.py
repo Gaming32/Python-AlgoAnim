@@ -57,7 +57,7 @@ class MainWindow:
         self.file_dialog = filedialog.Open(self.root, initialdir=os.getcwd())
         # Make the choose sort selection
         tk.Label(self.root, text='Choose Sort:').pack()
-        self.choose_sort = ttk.Combobox(self.root, text='Choose Sort', values=list(self.sorts), state='readonly')
+        self.choose_sort = ttk.Combobox(self.root, text='Choose Sort', values=sorted(self.sorts), state='readonly')
         self.choose_sort.bind('<<ComboboxSelected>>', self.choose_sort_click)
         self.choose_sort.pack()
         # Import sort button
@@ -98,7 +98,7 @@ class MainWindow:
         klass = load_sort_file(path, 'algoanim.sorts')
         if klass is not None:
             self.sorts[klass.name] = klass
-            self.choose_sort.config(values=list(self.sorts))
+            self.choose_sort.config(values=sorted(self.sorts))
             messagebox.showinfo(TITLE, f'Successfully loaded sort "{klass.name}"!')
         else:
             messagebox.showerror(TITLE, f'"{os.path.basename(path)}" is not a sort file!')
