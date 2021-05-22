@@ -37,7 +37,7 @@ class MainWindow:
     def __init__(self) -> None:
         self.load_sorts()
         self.create_widgets()
-        self.array = Array(128)
+        self.array = Array(2048)
         self.graphics = GraphicsThread(self.array)
         self.sort_thread = None
 
@@ -75,7 +75,7 @@ class MainWindow:
         self.show_stats = ttk.Checkbutton(self.root, text='Show stats', command=self.show_stats_click, variable=self.show_stats_var)
         self.show_stats.pack()
         # Length scale
-        self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7, length=250)
+        self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=11, length=250)
         self.length_scale.bind('<Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', False)))
         self.length_scale.bind('<Shift-Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', True)))
         self.length_scale.pack()
