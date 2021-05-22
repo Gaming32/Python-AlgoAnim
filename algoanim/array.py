@@ -59,6 +59,19 @@ class Array(list):
         # algorithms not written for this program
         self[a], self[b] = self[b], self[a]
 
+    def reverse_range(self, i: int, j: int) -> None:
+        while i < j:
+            self.swap(i, j)
+            i += 1
+            j -= 1
+
+    def reverse(self) -> None:
+        self.reverse_range(0, len(self) - 1)
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
+
     def __setitem__(self, i: int, v: int) -> None:
         self.write(i, v)
 

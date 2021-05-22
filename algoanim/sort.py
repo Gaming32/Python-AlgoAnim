@@ -39,6 +39,7 @@ class SortThread(Thread):
         self.wind.sort_thread = self
         self.wind.choose_sort.config(state='disabled')
         self.wind.length_scale.config(state='disabled')
+        self.wind.array.reset(len(self.wind.array))
         old_delay = self.wind.delay_multiplier
         self.wind.delay_multiplier = 1024 / len(self.wind.array)
         self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
@@ -54,7 +55,7 @@ class SortThread(Thread):
         self.wind.array.stats.reset()
         sort = self.klass()
         sort.run(self.wind.array)
-        self.wind.array.reset(len(self.wind.array))
+        self.wind.array.marks.clear()
         self.wind.length_scale.config(state='normal')
         self.wind.choose_sort.config(state='readonly')
         self.wind.sort_thread = None
