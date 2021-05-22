@@ -81,3 +81,4 @@ class GraphicsThread(Thread):
             if self.should_show_stats:
                 self.show_stats((ms + lastms) // 2)
             pygame.display.update()
+        pygame.quit()
