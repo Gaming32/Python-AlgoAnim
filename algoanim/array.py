@@ -9,6 +9,7 @@ class Array(list):
     single_delay: float
     delay: float
     length_lock: Lock
+    marks_lock: Lock
     stats: Stats
 
     def __init__(self, length: int) -> None:
@@ -18,6 +19,7 @@ class Array(list):
         self.single_delay = 0
         self.delay = 1
         self.length_lock = Lock()
+        self.marks_lock = Lock()
         self.stats = Stats()
 
     def sleep(self, ms: float) -> None:
@@ -39,7 +41,8 @@ class Array(list):
         with self.length_lock:
             self.clear()
             self.extend(range(length))
-        self.marks.clear()
+        with self.marks_lock:
+            self.marks.clear()
         self.current_delay = 0
 
     def set_delay_multiplier(self, mult: float) -> None:
@@ -50,8 +53,9 @@ class Array(list):
     def write(self, index: int, value: int) -> None:
         self.stats.add_writes()
         super().__setitem__(index, value)
-        self.marks.clear()
-        self.marks.add(index)
+        with self.marks_lock:
+            self.marks.clear()
+            self.marks.add(index)
         self.sleep(0.5)
 
     def swap(self, a: int, b: int) -> None:
@@ -77,7 +81,8 @@ class Array(list):
 
     def __getitem__(self, i: int) -> int:
         self.stats.add_reads()
-        self.marks.clear()
-        self.marks.add(i)
+        with self.marks_lock:
+            self.marks.clear()
+            self.marks.add(i)
         self.sleep(0.5)
         return super().__getitem__(i)

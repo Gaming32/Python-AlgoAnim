@@ -49,13 +49,15 @@ class SortThread(Thread):
         self.wind.graphics.label = '            '
         self.wind.delay_multiplier = old_delay
         self.wind.array.set_delay_multiplier(old_delay)
-        self.wind.array.marks.clear()
+        with self.wind.array.marks_lock:
+            self.wind.array.marks.clear()
         time.sleep(0.75)
         self.wind.graphics.label = self.klass.name
         self.wind.array.stats.reset()
         sort = self.klass()
         sort.run(self.wind.array)
-        self.wind.array.marks.clear()
+        with self.wind.array.marks_lock:
+            self.wind.array.marks.clear()
         self.wind.length_scale.config(state='normal')
         self.wind.choose_sort.config(state='readonly')
         self.wind.sort_thread = None

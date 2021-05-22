@@ -38,20 +38,26 @@ class SoundsThread(Thread):
         array = self.wind.array
         marks = array.marks
         while self.wind.graphics.running:
-            ms = self.clock.tick(120)
+            ms = self.clock.tick(60)
             for note in notes:
                 sound.note_off(note)
             notes.clear()
             length = len(array)
             note_count = min(len(marks), NUM_CHANNELS)
-            for i in marks:
-                pitch = array[min(max(i, 0), length - 1)] / length * (PITCH_MAX - PITCH_MIN) + PITCH_MIN
-                pitch_major = int(pitch)
-                pitch_minor = int((pitch - int(pitch)) * 8192)
-                vel = int(pow(PITCH_MAX - pitch_major, 2) * pow(note_count, -0.25) * 64 * SOUND_MUL) // 2
-                if SOUND_MUL >= 1 and vel < 256:
-                    vel *= vel
-                sound.note_on(pitch_major, vel)
-                sound.pitch_bend(pitch_minor)
-                notes.add(pitch_major)
+            try:
+                array.marks_lock.acquire()
+                for i in marks:
+                    array.marks_lock.release()
+                    pitch = array[min(max(i, 0), length - 1)] / length * (PITCH_MAX - PITCH_MIN) + PITCH_MIN
+                    pitch_major = int(pitch)
+                    pitch_minor = int((pitch - int(pitch)) * 8192)
+                    vel = int(pow(PITCH_MAX - pitch_major, 2) * pow(note_count, -0.25) * 64 * SOUND_MUL) // 2
+                    if SOUND_MUL >= 1 and vel < 256:
+                        vel *= vel
+                    sound.note_on(pitch_major, vel)
+                    sound.pitch_bend(pitch_minor)
+                    notes.add(pitch_major)
+                    array.marks_lock.acquire()
+            finally:
+                array.marks_lock.release()
         pygame.midi.quit()
