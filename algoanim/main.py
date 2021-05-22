@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import simpledialog
 
 from algoanim.graphics import GraphicsThread
 
@@ -18,6 +19,7 @@ class MainWindow:
     choose_sort: ttk.Combobox
     import_sort: ttk.Button
     cancel_delay: ttk.Button
+    set_delay: ttk.Button
     length_scale: ttk.Scale
 
     graphics: GraphicsThread
@@ -62,6 +64,9 @@ class MainWindow:
         # Cancel delay button
         self.cancel_delay = ttk.Button(self.root, text='Cancel delay', command=self.cancel_delay_click)
         self.cancel_delay.pack()
+        # Set delay button
+        self.set_delay = ttk.Button(self.root, text='Change speed multiplier', command=self.set_delay_click)
+        self.set_delay.pack()
         self.delay_multiplier = 1
         # Length scale
         self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7, length=250)
@@ -95,8 +100,14 @@ class MainWindow:
     def cancel_delay_click(self) -> None:
         self.array.set_delay_multiplier(0)
 
+    def set_delay_click(self) -> None:
+        new_delay = simpledialog.askfloat(TITLE, 'Enter a speed multiplier:')
+        if new_delay is not None:
+            self.delay_multiplier = 1 / new_delay
+            self.array.set_delay_multiplier(self.delay_multiplier)
+
     def length_scale_change(self, pow) -> None:
-        if self.is_scale_changing:
+        if self.is_scale_changing or self.sort_thread is not None:
             return
         self.is_scale_changing = True
         if self.sort_thread is None:

@@ -36,13 +36,17 @@ class SortThread(Thread):
 
     def run(self) -> None:
         self.wind.sort_thread = self
+        self.wind.choose_sort.config(state='disabled')
         self.wind.length_scale.config(state='disabled')
+        self.wind.array.set_delay_multiplier(1024 / len(self.wind.array))
         random.shuffle(self.wind.array)
+        self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
         sort = self.klass()
         sort.run(self.wind.array)
         self.wind.array.reset(len(self.wind.array))
         self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
         self.wind.length_scale.config(state='normal')
+        self.wind.choose_sort.config(state='readonly')
         self.wind.sort_thread = None
 
 

@@ -5,7 +5,6 @@ import time
 class Array(list):
     marks: set[int]
     current_delay: int
-    delay_mult: int
     delay: int
     length_lock: Lock
 

@@ -44,7 +44,8 @@ class GraphicsThread(Thread):
 
     def run(self) -> None:
         pygame.init()
-        self.window = pygame.display.set_mode((640, 480), RESIZABLE)
+        screen_info = pygame.display.Info()
+        self.window = pygame.display.set_mode((screen_info.current_w // 2, screen_info.current_h // 2), RESIZABLE)
         self.clock = pygame.time.Clock()
         self.running = True
         while self.running:
@@ -52,7 +53,8 @@ class GraphicsThread(Thread):
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.running = False
-            pygame.display.set_caption(f'{TITLE} - {len(self.array)} numbers, {self.array.current_delay}ms delay')
+            delay = self.array.current_delay * self.array.delay
+            pygame.display.set_caption(f'{TITLE} - {len(self.array)} numbers, {delay}ms delay')
             self.window.fill((0, 0, 0))
             with self.array.length_lock:
                 self.render(self.array)
