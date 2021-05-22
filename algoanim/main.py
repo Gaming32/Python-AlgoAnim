@@ -1,6 +1,7 @@
 from typing import Optional
 from algoanim.array import Array
 import os
+import math
 from algoanim.utils import SORTS_DIR, TITLE
 from algoanim.sort import Sort, SortThread, load_sort_file
 from threading import Thread
@@ -17,6 +18,10 @@ class MainWindow:
     choose_sort: ttk.Combobox
     import_sort: ttk.Button
     cancel_delay: ttk.Button
+    scales: tk.Frame
+    length_scale: ttk.Scale
+    speed_scale: ttk.Scale
+
     graphics: GraphicsThread
     sorts: dict[str, Sort]
     array: Array
@@ -50,11 +55,20 @@ class MainWindow:
         self.choose_sort.bind('<<ComboboxSelected>>', self.choose_sort_click)
         self.choose_sort.pack()
         # Import sort button
-        self.import_sort = ttk.Button(text='Import sort', command=self.import_sort_click)
+        self.import_sort = ttk.Button(self.root, text='Import sort', command=self.import_sort_click)
         self.import_sort.pack()
         # Cancel delay button
-        self.cancel_delay = ttk.Button(text='Cancel delay', command=self.cancel_delay_click)
+        self.cancel_delay = ttk.Button(self.root, text='Cancel delay', command=self.cancel_delay_click)
         self.cancel_delay.pack()
+        ## Scales
+        self.scales = tk.Frame()
+        # Length scale
+        self.length_scale = ttk.Scale(self.scales, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7)
+        self.length_scale.pack(side=tk.LEFT)
+        # Speed scale
+        self.speed_scale = ttk.Scale(self.scales, command=self.speed_scale_change, orient='vertical', to=1, from_=20, value=9)
+        self.speed_scale.pack(side=tk.LEFT)
+        self.scales.pack()
 
     def choose_sort_click(self, event: tk.Event) -> None:
         if self.sort_thread is not None:
@@ -79,6 +93,13 @@ class MainWindow:
 
     def cancel_delay_click(self) -> None:
         self.array.delay = 0
+
+    def length_scale_change(self, pow) -> None:
+        if self.sort_thread is None:
+            self.array.reset(int(2 ** float(pow)))
+
+    def speed_scale_change(self, pow) -> None:
+        self.array.set_delay_multiplier(int(2 ** float(pow)))
 
     def check_closed(self) -> None:
         if hasattr(self.graphics, 'running') and not self.graphics.running:

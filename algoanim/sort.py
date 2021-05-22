@@ -31,10 +31,12 @@ class SortThread(Thread):
 
     def run(self) -> None:
         self.wind.sort_thread = self
+        self.wind.length_scale.config(state='disabled')
         random.shuffle(self.wind.array)
         sort = self.klass()
         sort.run(self.wind.array)
         self.wind.array.reset(len(self.wind.array))
+        self.wind.length_scale.config(state='normal')
         self.wind.sort_thread = None
 
 

@@ -26,7 +26,7 @@ class GraphicsThread(Thread):
         scalex, scaley = winw / len(array), winh / len(array)
         j = 0
         for i in range(len(array)):
-            width = int(scalex * i) - j
+            width = int(scalex * (i + 1)) - j
             if width == 0:
                 continue
             val = list.__getitem__(array, i) # Doing this to avoid highlighting indices while rendering
@@ -35,7 +35,7 @@ class GraphicsThread(Thread):
             j += width
         j = 0
         for i in range(len(array)):
-            width = int(scalex * i) - j
+            width = int(scalex * (i + 1)) - j
             if i in array.marks:
                 val = list.__getitem__(array, i) # Doing this to avoid highlighting indices while rendering
                 y = int(winh - (val + 1) * scaley)
@@ -45,18 +45,23 @@ class GraphicsThread(Thread):
     def run(self) -> None:
         pygame.init()
         self.window = pygame.display.set_mode((640, 480), RESIZABLE)
-        # self.scale = (WINDOW_SIZE[0] - 40)
         self.clock = pygame.time.Clock()
         self.running = True
         lastlen = -1
+        lastdelay = -1
         while self.running:
             ms = self.clock.tick(60)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.running = False
-            if lastlen != len(self.array):
+            if (
+                lastlen != len(self.array)
+                or lastdelay != self.array.delay_mult
+            ):
                 lastlen = len(self.array)
+                lastdelay = self.array.delay_mult
                 pygame.display.set_caption(f'{TITLE} - {lastlen} numbers, {self.array.delay}ms delay')
             self.window.fill((0, 0, 0))
-            self.render(self.array)
+            with self.array.length_lock:
+                self.render(self.array)
             pygame.display.update()
