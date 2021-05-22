@@ -20,6 +20,7 @@ class MainWindow:
     import_sort: ttk.Button
     cancel_delay: ttk.Button
     set_delay: ttk.Button
+    show_stats: ttk.Checkbutton
     length_scale: ttk.Scale
 
     graphics: GraphicsThread
@@ -31,6 +32,7 @@ class MainWindow:
     is_scale_changing: bool
     lock_to_pow2: bool
     delay_multiplier: float
+    show_stats_var: tk.IntVar
 
     def __init__(self) -> None:
         self.load_sorts()
@@ -68,6 +70,10 @@ class MainWindow:
         self.set_delay = ttk.Button(self.root, text='Change speed multiplier', command=self.set_delay_click)
         self.set_delay.pack()
         self.delay_multiplier = 1
+        # Show stats checkbox
+        self.show_stats_var = tk.IntVar(self.root, 1)
+        self.show_stats = ttk.Checkbutton(self.root, text='Show stats', command=self.show_stats_click, variable=self.show_stats_var)
+        self.show_stats.pack()
         # Length scale
         self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=7, length=250)
         self.length_scale.bind('<Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', False)))
@@ -101,10 +107,13 @@ class MainWindow:
         self.array.set_delay_multiplier(0)
 
     def set_delay_click(self) -> None:
-        new_delay = simpledialog.askfloat(TITLE, 'Enter a speed multiplier:')
+        new_delay = simpledialog.askfloat(TITLE, 'Enter a speed multiplier:', initialvalue=str(1 / self.delay_multiplier))
         if new_delay is not None:
             self.delay_multiplier = 1 / new_delay
             self.array.set_delay_multiplier(self.delay_multiplier)
+
+    def show_stats_click(self) -> None:
+        self.graphics.should_show_stats = bool(self.show_stats_var.get())
 
     def length_scale_change(self, pow) -> None:
         if self.is_scale_changing or self.sort_thread is not None:

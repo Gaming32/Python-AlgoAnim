@@ -1,4 +1,5 @@
 from __future__ import annotations
+import time
 from typing import TYPE_CHECKING
 from threading import Thread
 from algoanim.array import Array
@@ -38,13 +39,22 @@ class SortThread(Thread):
         self.wind.sort_thread = self
         self.wind.choose_sort.config(state='disabled')
         self.wind.length_scale.config(state='disabled')
-        self.wind.array.set_delay_multiplier(1024 / len(self.wind.array))
-        random.shuffle(self.wind.array)
+        old_delay = self.wind.delay_multiplier
+        self.wind.delay_multiplier = 1024 / len(self.wind.array)
         self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
+        self.wind.graphics.label = 'Shuffling...'
+        self.wind.array.stats.reset()
+        random.shuffle(self.wind.array)
+        self.wind.graphics.label = '            '
+        self.wind.delay_multiplier = old_delay
+        self.wind.array.set_delay_multiplier(old_delay)
+        self.wind.array.marks.clear()
+        time.sleep(0.75)
+        self.wind.graphics.label = self.klass.name
+        self.wind.array.stats.reset()
         sort = self.klass()
         sort.run(self.wind.array)
         self.wind.array.reset(len(self.wind.array))
-        self.wind.array.set_delay_multiplier(self.wind.delay_multiplier)
         self.wind.length_scale.config(state='normal')
         self.wind.choose_sort.config(state='readonly')
         self.wind.sort_thread = None

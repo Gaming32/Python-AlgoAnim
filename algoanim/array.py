@@ -1,21 +1,27 @@
+from algoanim.stats import Stats
 from threading import Lock
 import time
 
 
 class Array(list):
     marks: set[int]
-    current_delay: int
-    delay: int
+    current_delay: float
+    single_delay: float
+    delay: float
     length_lock: Lock
+    stats: Stats
 
     def __init__(self, length: int) -> None:
         super().__init__(range(length))
         self.marks = set()
         self.current_delay = 0
+        self.single_delay = 0
         self.delay = 1
         self.length_lock = Lock()
+        self.stats = Stats()
 
-    def sleep(self, ms: int) -> None:
+    def sleep(self, ms: float) -> None:
+        self.single_delay = ms
         if self.delay == 0:
             return
         self.current_delay += ms
@@ -27,6 +33,7 @@ class Array(list):
                 self.current_delay = 0
             else:
                 self.current_delay -= ((end - start) // 1e6) / self.delay
+        self.single_delay = 0
 
     def reset(self, length: int) -> None:
         with self.length_lock:
@@ -41,6 +48,7 @@ class Array(list):
         self.delay = mult
 
     def write(self, index: int, value: int) -> None:
+        self.stats.add_writes()
         super().__setitem__(index, value)
         self.marks.clear()
         self.marks.add(index)
@@ -55,6 +63,7 @@ class Array(list):
         self.write(i, v)
 
     def __getitem__(self, i: int) -> int:
+        self.stats.add_reads()
         self.marks.clear()
         self.marks.add(i)
         self.sleep(0.5)
