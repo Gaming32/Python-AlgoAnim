@@ -45,15 +45,18 @@ class GraphicsThread(Thread):
     def run(self) -> None:
         pygame.init()
         self.window = pygame.display.set_mode((640, 480), RESIZABLE)
-        pygame.display.set_caption(TITLE)
         # self.scale = (WINDOW_SIZE[0] - 40)
         self.clock = pygame.time.Clock()
         self.running = True
+        lastlen = -1
         while self.running:
             ms = self.clock.tick(60)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.running = False
+            if lastlen != len(self.array):
+                lastlen = len(self.array)
+                pygame.display.set_caption(f'{TITLE} - {lastlen} numbers, {self.array.delay}ms delay')
             self.window.fill((0, 0, 0))
             self.render(self.array)
             pygame.display.update()

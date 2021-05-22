@@ -16,6 +16,7 @@ class MainWindow:
     root: tk.Tk
     choose_sort: ttk.Combobox
     import_sort: ttk.Button
+    cancel_delay: ttk.Button
     graphics: GraphicsThread
     sorts: dict[str, Sort]
     array: Array
@@ -25,7 +26,7 @@ class MainWindow:
     def __init__(self) -> None:
         self.load_sorts()
         self.create_widgets()
-        self.array = Array(2048)
+        self.array = Array(128)
         self.graphics = GraphicsThread(self.array)
         self.sort_thread = None
 
@@ -49,8 +50,11 @@ class MainWindow:
         self.choose_sort.bind('<<ComboboxSelected>>', self.choose_sort_click)
         self.choose_sort.pack()
         # Import sort button
-        self.import_sort = ttk.Button(text='Import Sort', command=self.import_sort_click)
+        self.import_sort = ttk.Button(text='Import sort', command=self.import_sort_click)
         self.import_sort.pack()
+        # Cancel delay button
+        self.cancel_delay = ttk.Button(text='Cancel delay', command=self.cancel_delay_click)
+        self.cancel_delay.pack()
 
     def choose_sort_click(self, event: tk.Event) -> None:
         if self.sort_thread is not None:
@@ -72,6 +76,9 @@ class MainWindow:
             messagebox.showinfo(TITLE, f'Successfully loaded sort "{klass.name}"!')
         else:
             messagebox.showerror(TITLE, f'"{os.path.basename(path)}" is not a sort file!')
+
+    def cancel_delay_click(self) -> None:
+        self.array.delay = 0
 
     def check_closed(self) -> None:
         if hasattr(self.graphics, 'running') and not self.graphics.running:
