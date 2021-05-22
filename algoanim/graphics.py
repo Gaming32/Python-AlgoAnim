@@ -56,7 +56,7 @@ class GraphicsThread(Thread):
         text += f'   {delay:5}ms delay'
         text += f'   {stats.writes:4} writes'
         text += f'   {stats.accesses:4} accesses'
-        text += f'   {1000 / tick_ms:10.0f} fps'
+        text += f'   {1000 / tick_ms:4.0f} fps'
         render = self.stats_font.render(text, True, (255, 255, 255))
         rect = render.get_rect()
         self.window.blit(render.convert_alpha(), (10, 10, rect.w, rect.h))
