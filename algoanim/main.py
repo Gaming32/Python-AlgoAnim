@@ -1,3 +1,4 @@
+from algoanim.sounds import SoundsThread
 from typing import Optional
 from algoanim.array import Array
 import os
@@ -24,6 +25,7 @@ class MainWindow:
     length_scale: ttk.Scale
 
     graphics: GraphicsThread
+    sounds: SoundsThread
     sorts: dict[str, Sort]
     array: Array
     sort_thread: Optional[SortThread]
@@ -39,6 +41,7 @@ class MainWindow:
         self.create_widgets()
         self.array = Array(2048)
         self.graphics = GraphicsThread(self.array)
+        self.sounds = SoundsThread(self)
         self.sort_thread = None
 
     def load_sorts(self) -> None:
@@ -134,6 +137,7 @@ class MainWindow:
 
     def main(self) -> None:
         self.graphics.start()
+        self.sounds.start()
         self.root.after(500, self.check_closed)
         self.root.mainloop()
         self.graphics.running = False

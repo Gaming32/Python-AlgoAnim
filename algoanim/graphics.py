@@ -22,10 +22,11 @@ class GraphicsThread(Thread):
     label: str
 
     def __init__(self, array: Array) -> None:
-        super().__init__(name='Graphics', daemon=True)
+        super().__init__(name='Graphics', daemon=False)
         self.array = array
         self.should_show_stats = True
         self.label = ''
+        self.running = True
 
     def render(self, array: Array):
         winw, winh = self.window.get_size()
@@ -68,7 +69,6 @@ class GraphicsThread(Thread):
         pygame.display.set_caption(f'{TITLE}') # Doing this weird syntax just in case I decide to add something more later
         self.stats_font = pygame.font.SysFont('lucida console', 16)
         self.clock = pygame.time.Clock()
-        self.running = True
         lastms = 1000 // 60
         while self.running:
             ms = self.clock.tick(60)
