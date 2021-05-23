@@ -11,6 +11,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import simpledialog
+import webbrowser
 
 from algoanim.graphics import GraphicsThread
 
@@ -22,6 +23,7 @@ class MainWindow:
     cancel_delay: ttk.Button
     set_delay: ttk.Button
     show_stats: ttk.Checkbutton
+    choose_instrument: ttk.Spinbox
     length_scale: ttk.Scale
 
     graphics: GraphicsThread
@@ -62,7 +64,7 @@ class MainWindow:
         tk.Label(self.root, text='Choose Sort:').pack()
         self.choose_sort = ttk.Combobox(self.root, text='Choose Sort', values=sorted(self.sorts), state='readonly')
         self.choose_sort.bind('<<ComboboxSelected>>', self.choose_sort_click)
-        self.choose_sort.pack()
+        self.choose_sort.pack(pady=(0, 10))
         # Import sort button
         self.import_sort = ttk.Button(self.root, text='Import sort', command=self.import_sort_click)
         self.import_sort.pack()
@@ -77,7 +79,20 @@ class MainWindow:
         self.show_stats_var = tk.IntVar(self.root, 1)
         self.show_stats = ttk.Checkbutton(self.root, text='Show stats', command=self.show_stats_click, variable=self.show_stats_var)
         self.show_stats.pack()
+        # Instrument spinbox
+        tk.Label(self.root, text='Instrument #:').pack(pady=(10, 0))
+        instrument_frame = ttk.Frame(self.root)
+        self.choose_instrument = ttk.Spinbox(instrument_frame, from_=1, to=128, width=8, command=self.choose_instrument_change)
+        self.choose_instrument.set(1)
+        self.choose_instrument.pack(side=tk.LEFT)
+        question_button = ttk.Button(instrument_frame, text='?', width=3)
+        question_button.config(command=(lambda:
+            webbrowser.open_new_tab('https://en.wikipedia.org/wiki/General_MIDI#Program_change_events')
+        ))
+        question_button.pack(side=tk.LEFT)
+        instrument_frame.pack()
         # Length scale
+        tk.Label(self.root, text='Array length:').pack(pady=(10, 0))
         self.length_scale = ttk.Scale(self.root, command=self.length_scale_change, orient='vertical', to=1, from_=20, value=11, length=250)
         self.length_scale.bind('<Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', False)))
         self.length_scale.bind('<Shift-Button-1>', (lambda ev: setattr(self, 'lock_to_pow2', True)))
@@ -117,6 +132,9 @@ class MainWindow:
 
     def show_stats_click(self) -> None:
         self.graphics.should_show_stats = bool(self.show_stats_var.get())
+
+    def choose_instrument_change(self) -> None:
+        self.sounds.instrument = int(self.choose_instrument.get())
 
     def length_scale_change(self, pow) -> None:
         if self.is_scale_changing or self.sort_thread is not None:
