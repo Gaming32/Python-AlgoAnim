@@ -134,7 +134,7 @@ class MainWindow:
         self.graphics.should_show_stats = bool(self.show_stats_var.get())
 
     def choose_instrument_change(self) -> None:
-        self.sounds.instrument = int(self.choose_instrument.get())
+        self.sounds.instrument = int(self.choose_instrument.get()) - 1
 
     def length_scale_change(self, pow) -> None:
         if self.is_scale_changing or self.sort_thread is not None:
