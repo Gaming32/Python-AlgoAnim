@@ -1,6 +1,7 @@
 from algoanim.stats import Stats
 from threading import Lock
 import time
+from typing import Iterable, Union
 
 
 class Array(list):
@@ -58,6 +59,14 @@ class Array(list):
             self.marks.add(index)
         self.sleep(0.5)
 
+    def read(self, i: int) -> int:
+        self.stats.add_reads()
+        with self.marks_lock:
+            self.marks.clear()
+            self.marks.add(i)
+        self.sleep(0.5)
+        return super().__getitem__(i)
+
     def swap(self, a: int, b: int) -> None:
         # This swap algorithm matches Python sorting
         # algorithms not written for this program
@@ -76,13 +85,21 @@ class Array(list):
         for i in range(len(self)):
             yield self[i]
 
-    def __setitem__(self, i: int, v: int) -> None:
-        self.write(i, v)
+    def __setitem__(self, i: Union[int, slice], v: Union[int, Iterable[int]]) -> None:
+        if isinstance(i, slice):
+            if i.step is not None and i.step != 1:
+                raise NotImplementedError('Stepped slice assignments not supported')
+            v = iter(v)
+            for j in range(*i.indices(len(self))):
+                self.write(j, next(v))
+        else:
+            self.write(i, v)
 
-    def __getitem__(self, i: int) -> int:
-        self.stats.add_reads()
-        with self.marks_lock:
-            self.marks.clear()
-            self.marks.add(i)
-        self.sleep(0.5)
-        return super().__getitem__(i)
+    def __getitem__(self, i: Union[int, slice]) -> Union[int, Iterable[int]]:
+        if isinstance(i, slice):
+            result = []
+            for j in range(*i.indices(len(self))):
+                result.append(self.read(j))
+            return result
+        else:
+            return self.read(i)
